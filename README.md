@@ -154,20 +154,36 @@ kubectl exec nccl-test-host-1 -it -- /scripts/container_entry.sh shell
 ```shell
 # global allreduce
 kubectl exec nccl-test-host-1 -it -- /usr/local/gib/scripts/run_nccl_tests.sh -t all_reduce -b 1K -e 8G nccl-host-1 nccl-host-2
+```
 
+```shell
 # multi allreduce
 kubectl exec nccl-test-host-1 -it -- /usr/local/gib/scripts/run_nccl_tests.sh -t all_reduce -b 1K -e 8G -m 0x7 nccl-host-1 nccl-host-2
 kubectl exec nccl-test-host-1 -it -- /usr/local/gib/scripts/run_nccl_tests.sh -t all_reduce -b 1K -e 8G -m 0x1 nccl-host-1 nccl-host-2
+```
 
+```shell
 # all2all
 kubectl exec nccl-test-host-1 -it -- /usr/local/gib/scripts/run_nccl_tests.sh -t alltoall -b 1K -e 8G nccl-host-1 nccl-host-2
 ```
 
-对于更多的节点，可以考虑用jobset的方式执行。
+对于更多的节点，可以考虑用jobset的方式执行，参考[示例](https://github.com/GoogleCloudPlatform/cluster-toolkit/blob/main/examples/gke-a4/nccl-jobset-example.yaml)。执行前需更新以下值为正确的节点数再运行。
+```yaml
+        spec:
+          parallelism: 2
+          completions: 2
+...
+                - name: N_NODES
+                  value: "2"
+```
 
 ```shell
 # update num nodes before use.
 kubectl apply -f examples/nccl-jobset-test.yaml
+```
+查看其输出。
+```shell
+kubectl logs -f job.batch/nccl-allgather-worker-0
 ```
 
 ## 四、Nemo测试
