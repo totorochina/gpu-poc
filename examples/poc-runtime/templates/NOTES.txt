@@ -1,0 +1,24 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To verify the deployment:
+
+  kubectl get pods | grep nccl-host
+  kubectl get services | grep nccl-host
+
+This deployment has created {{ .Values.replicaCount }} node(s) with the following configuration:
+- Container image: {{ .Values.images.container.repository }}:{{ .Values.images.container.tag }}
+- Init container image: {{ .Values.images.initContainer.repository }}:{{ .Values.images.initContainer.tag }}
+- GPUs per node: {{ .Values.resources.limits.nvidia.com/gpu }}
+
+To customize this deployment:
+
+  # Change the number of nodes
+  helm upgrade {{ .Release.Name }} . --set replicaCount=4
+
+  # Update container images
+  helm upgrade {{ .Release.Name }} . --set images.container.tag=new-tag
+
+  # Full customization with values file
+  helm upgrade {{ .Release.Name }} . -f custom-values.yaml

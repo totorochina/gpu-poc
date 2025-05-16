@@ -1,0 +1,6 @@
+apiVersion: v2
+name: poc-runtime
+description: A Helm chart for GPU POC runtime
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

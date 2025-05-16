@@ -1,0 +1,33 @@
+# Default values for poc-runtime
+# This is a YAML-formatted file.
+
+# Number of NCCL nodes to create
+replicaCount: 2
+
+# Container images
+images:
+  container:
+    repository: nvcr.io/nvidia/pytorch
+    tag: 25.01-py3
+    pullPolicy: IfNotPresent
+  initContainer:
+    repository: us-docker.pkg.dev/gce-ai-infra/gpudirect-gib/nccl-plugin-gib-diagnostic
+    tag: v1.0.5
+    pullPolicy: Always
+
+# Resources for the pods
+resources:
+  requests:
+    cpu: 150m
+  limits:
+    nvidia.com/gpu: 8
+
+# Volume settings
+volumes:
+  sharedMemory:
+    sizeLimit: 250Gi
+  persistentVolumeClaims:
+    checkpoint:
+      claimName: checkpoint-gke-a4-hzchen-poc-4b214df7-pvc
+    training:
+      claimName: training-gke-a4-hzchen-poc-8d5e8c21-pvc
