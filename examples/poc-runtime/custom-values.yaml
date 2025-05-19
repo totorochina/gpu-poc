@@ -1,0 +1,13 @@
+# Custom values that are frequently changed
+# Override these as needed for each deployment
+
+# Number of NCCL nodes to create
+replicaCount: 2
+
+# Persistent Volume Claims
+volumes:
+  persistentVolumeClaims:
+    checkpoint:
+      claimName: checkpoint-gke-a4-hzchen-poc-4b214df7-pvc
+    training:
+      claimName: training-gke-a4-hzchen-poc-8d5e8c21-pvc

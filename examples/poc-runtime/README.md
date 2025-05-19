@@ -4,74 +4,45 @@ This Helm chart deploys a configurable number of NCCL nodes for GPU testing and 
 
 ## Introduction
 
-This chart creates a set of pods and headless services with names following the pattern `nccl-host-${NUMBER}`. Each pod runs the specified container image and includes necessary configurations for GPU workloads.
-
-## Prerequisites
-
-- Kubernetes cluster with GPU support
-- Helm 3.0+
-- Persistent volume claims for checkpoint and training data
-- Proper network configuration for RDMA interfaces
+This chart creates a set of pods and headless services with names following the pattern `{RELEASE-NAME}-{NUMBER}`. Each pod runs the specified container image and includes necessary configurations for GPU workloads.
 
 ## Installing the Chart
 
-To install the chart with the release name `my-release`:
+
 
 ```bash
-helm install my-release ./examples/poc-runtime
+export CHECKPOINT_PVC=$(kubectl get pvc -o json | jq -r '.items[] | select(.metadata.name | test("^checkpoint-.*")) | .metadata.name')
+export TRAINING_PVC=$(kubectl get pvc -o json | jq -r '.items[] | select(.metadata.name | test("^training-.*")) | .metadata.name')
+export N_NODES=2
+
+cat <<EOF >custom-values.yaml
+# Number of NCCL nodes to create
+replicaCount: ${N_NODES}
+
+# Persistent Volume Claims
+volumes:
+  persistentVolumeClaims:
+    checkpoint:
+      claimName: ${CHECKPOINT_PVC}
+    training:
+      claimName: ${TRAINING_PVC}
+EOF
+
+helm install gpu ./examples/poc-runtime -f custom-values.yaml
 ```
 
-## Configuration
+## Examples
 
-The following table lists the configurable parameters of the chart and their default values.
-
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `replicaCount` | Number of NCCL nodes to create | `2` |
-| `images.container.repository` | Container image repository | `nvcr.io/nvidia/pytorch` |
-| `images.container.tag` | Container image tag | `25.01-py3` |
-| `images.container.pullPolicy` | Container image pull policy | `IfNotPresent` |
-| `images.initContainer.repository` | Init container image repository | `us-docker.pkg.dev/gce-ai-infra/gpudirect-gib/nccl-plugin-gib-diagnostic` |
-| `images.initContainer.tag` | Init container image tag | `v1.0.5` |
-| `images.initContainer.pullPolicy` | Init container image pull policy | `Always` |
-| `resources.requests.cpu` | CPU requests | `150m` |
-| `resources.limits.nvidia.com/gpu` | GPU limits | `8` |
-| `volumes.sharedMemory.sizeLimit` | Shared memory size limit | `250Gi` |
-| `volumes.persistentVolumeClaims.checkpoint.claimName` | Checkpoint PVC name | `checkpoint-gke-a4-hzchen-poc-4b214df7-pvc` |
-| `volumes.persistentVolumeClaims.training.claimName` | Training PVC name | `training-gke-a4-hzchen-poc-8d5e8c21-pvc` |
-
-## Example: Installing with Custom Values
-
-Create a custom values file (e.g., `custom-values.yaml`):
-
-```yaml
-replicaCount: 4
-images:
-  container:
-    tag: 24.12-py3
-resources:
-  limits:
-    nvidia.com/gpu: 4
-```
-
-Then install the chart with:
+### Example 1: Overwriting specific values
 
 ```bash
-helm install my-release ./examples/poc-runtime -f custom-values.yaml
+helm install gpu ./examples/poc-runtime -f custom-values.yaml \
+  --set replicaCount=1
 ```
 
-## Example: Updating Node Count
-
-To change the number of nodes for an existing deployment:
-
+### Example 2: Scaling node counts
 ```bash
-helm upgrade my-release ./examples/poc-runtime --set replicaCount=8
-```
-
-## Example: Updating Container Images
-
-To update the container image for an existing deployment:
-
-```bash
-helm upgrade my-release ./examples/poc-runtime --set images.container.tag=24.12-py3
+helm delete gpu
+helm install gpu ./examples/poc-runtime -f custom-values.yaml \
+  --set replicaCount=16
 ```

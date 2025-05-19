@@ -1,8 +1,6 @@
 # Default values for poc-runtime
 # This is a YAML-formatted file.
-
-# Number of NCCL nodes to create
-replicaCount: 2
+# These are relatively static variables that don't change frequently.
 
 # Container images
 images:
@@ -21,13 +19,3 @@ resources:
     cpu: 150m
   limits:
     nvidia.com/gpu: 8
-
-# Volume settings
-volumes:
-  sharedMemory:
-    sizeLimit: 250Gi
-  persistentVolumeClaims:
-    checkpoint:
-      claimName: checkpoint-gke-a4-hzchen-poc-4b214df7-pvc
-    training:
-      claimName: training-gke-a4-hzchen-poc-8d5e8c21-pvc

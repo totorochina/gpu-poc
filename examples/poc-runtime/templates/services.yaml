@@ -1,13 +1,14 @@
 {{- $root := . -}}
-{{- range $i := until (int .Values.replicaCount) }}
+{{- $replicaCount := .Values.replicaCount -}}
+{{- range $i := until (int $replicaCount) }}
 {{- $nodeIndex := add $i 1 }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nccl-host-{{ $nodeIndex }}
+  name: {{ $root.Release.Name }}-{{ $nodeIndex }}
 spec:
   selector:
-    name: nccl-host-{{ $nodeIndex }}
+    name: {{ $root.Release.Name }}-{{ $nodeIndex }}
   clusterIP: None
 {{- end }}
