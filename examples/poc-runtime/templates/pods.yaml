@@ -34,6 +34,9 @@ spec:
   hostPID: false
   serviceAccount: workload-identity-k8s-sa
   volumes:
+    - name: local-ssd
+      hostPath:
+        path: /mnt/stateful_partition/kube-ephemeral-ssd
     - name: library-dir-host
       hostPath:
         path: /home/kubernetes/bin/nvidia
@@ -50,16 +53,23 @@ spec:
     - name: training-volume
       persistentVolumeClaim:
         claimName: {{ $root.Values.volumes.persistentVolumeClaims.training.claimName }}
+    - name: nfs-volume
+      persistentVolumeClaim:
+        claimName: {{ $root.Values.volumes.persistentVolumeClaims.nfs.claimName }}
   containers:
     - image: "{{ $root.Values.images.container.repository }}:{{ $root.Values.images.container.tag }}"
       name: poc-runtime
       imagePullPolicy: {{ $root.Values.images.container.pullPolicy }}
+      securityContext:
+        privileged: true
       resources:
         requests:
           cpu: {{ $root.Values.resources.requests.cpu }}
         limits:
           nvidia.com/gpu: {{ index $root.Values.resources.limits "nvidia.com/gpu" }}
       volumeMounts:
+        - name: local-ssd
+          mountPath: /scratch-data
         - name: library-dir-host
           mountPath: /usr/local/nvidia
         - name: gib
@@ -69,6 +79,8 @@ spec:
         - name: checkpoint-volume
           mountPath: /checkpoint_data
         - name: training-volume
+          mountPath: /training_data
+        - name: nfs-volume
           mountPath: /cfs
       env:
         - name: LD_LIBRARY_PATH
@@ -92,7 +104,7 @@ spec:
           apt install -y iputils-ping openssh-server iproute2 pciutils
 
           # Setup ssh
-          cp /cfs/id_rsa* /cfs/authorized_keys /root/.ssh/
+          cp /training_data/id_rsa* /training_data/authorized_keys /root/.ssh/
           chmod 400 /root/.ssh/id_rsa
           sed -i 's/^#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
           echo "Port 222" | tee -a /etc/ssh/sshd_config > /dev/null

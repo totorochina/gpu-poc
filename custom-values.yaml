@@ -5,6 +5,8 @@ replicaCount: 2
 volumes:
   persistentVolumeClaims:
     checkpoint:
-      claimName: checkpoint-gke-a4-hzchen-poc-4b214df7-pvc
+      claimName: checkpoint-gke-a4-poc-c6aa9adf-pvc
     training:
-      claimName: training-gke-a4-hzchen-poc-8d5e8c21-pvc
+      claimName: training-gke-a4-poc-50421fa9-pvc
+    nfs:
+      claimName: cfs-pvc

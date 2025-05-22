@@ -58,10 +58,10 @@ spec:
         sizeLimit: 250Gi
     - name: checkpoint-volume
       persistentVolumeClaim:
-        claimName: checkpoint-gke-a4-hzchen-poc-4b214df7-pvc
+        claimName: checkpoint-gke-a4-poc-c6aa9adf-pvc
     - name: training-volume
       persistentVolumeClaim:
-        claimName: training-gke-a4-hzchen-poc-8d5e8c21-pvc
+        claimName: training-gke-a4-poc-50421fa9-pvc
   containers:
     - image: nvcr.io/nvidia/pytorch:25.01-py3
       name: ngc-25-01
@@ -200,10 +200,10 @@ spec:
         sizeLimit: 250Gi
     - name: checkpoint-volume
       persistentVolumeClaim:
-        claimName: checkpoint-gke-a4-hzchen-poc-4b214df7-pvc
+        claimName: checkpoint-gke-a4-poc-c6aa9adf-pvc
     - name: training-volume
       persistentVolumeClaim:
-        claimName: training-gke-a4-hzchen-poc-8d5e8c21-pvc
+        claimName: training-gke-a4-poc-50421fa9-pvc
   containers:
     - image: nvcr.io/nvidia/pytorch:25.01-py3
       name: ngc-25-01

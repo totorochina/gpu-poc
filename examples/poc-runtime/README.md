@@ -27,7 +27,9 @@ volumes:
     training:
       claimName: ${TRAINING_PVC}
 EOF
+```
 
+```bash
 helm install gpu ./examples/poc-runtime -f custom-values.yaml
 ```
 
@@ -45,4 +47,12 @@ helm install gpu ./examples/poc-runtime -f custom-values.yaml \
 helm delete gpu
 helm install gpu ./examples/poc-runtime -f custom-values.yaml \
   --set replicaCount=16
+```
+
+### Example 3: Update docker images
+```bash
+helm delete gpu
+helm install gpu ./examples/poc-runtime -f custom-values.yaml \
+  --set images.container.repository = us-central1-docker.pkg.dev/tx-poc-250507/tx-poc-repo/tensorrt_master \
+  --set images.container.tag = v0.18.2
 ```
