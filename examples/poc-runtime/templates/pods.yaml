@@ -47,15 +47,21 @@ spec:
       emptyDir:
         medium: "Memory"
         sizeLimit: "250Gi"
+  {{ if $root.Values.volumes.persistentVolumeClaims.checkpoint.claimName }}
     - name: checkpoint-volume
       persistentVolumeClaim:
         claimName: {{ $root.Values.volumes.persistentVolumeClaims.checkpoint.claimName }}
+  {{ end }}
+  {{ if $root.Values.volumes.persistentVolumeClaims.training.claimName }}
     - name: training-volume
       persistentVolumeClaim:
         claimName: {{ $root.Values.volumes.persistentVolumeClaims.training.claimName }}
+  {{ end }}
+  {{ if $root.Values.volumes.persistentVolumeClaims.nfs.claimName }}
     - name: nfs-volume
       persistentVolumeClaim:
         claimName: {{ $root.Values.volumes.persistentVolumeClaims.nfs.claimName }}
+  {{ end }}
   containers:
     - image: "{{ $root.Values.images.container.repository }}:{{ $root.Values.images.container.tag }}"
       name: poc-runtime
@@ -63,8 +69,10 @@ spec:
       securityContext:
         privileged: true
       resources:
+      {{ if $root.Values.resources.requests.cpu }}
         requests:
           cpu: {{ $root.Values.resources.requests.cpu }}
+      {{ end }}
         limits:
           nvidia.com/gpu: {{ index $root.Values.resources.limits "nvidia.com/gpu" }}
       volumeMounts:
@@ -76,12 +84,18 @@ spec:
           mountPath: /usr/local/gib
         - name: shared-memory
           mountPath: /dev/shm
+      {{ if $root.Values.volumes.persistentVolumeClaims.checkpoint.claimName }}
         - name: checkpoint-volume
           mountPath: /checkpoint_data
+      {{ end }}
+      {{ if $root.Values.volumes.persistentVolumeClaims.training.claimName }}
         - name: training-volume
           mountPath: /training_data
+      {{ end }}
+      {{ if $root.Values.volumes.persistentVolumeClaims.nfs.claimName }}
         - name: nfs-volume
           mountPath: /cfs
+      {{ end }}
       env:
         - name: LD_LIBRARY_PATH
           value: /usr/local/nvidia/lib64
@@ -102,6 +116,20 @@ spec:
           # Install ping
           apt update -y
           apt install -y iputils-ping openssh-server iproute2 pciutils
+
+          # Install gcloud sdk
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
+            tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+            gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+            apt-get update -y && \
+            apt-get install google-cloud-cli -y
+
+          # Enable persistence
+          for i in $(seq 0 7)
+          do
+            nvidia-smi -i $i -pm ENABLED
+          done
 
           # Setup ssh
           cp /training_data/id_rsa* /training_data/authorized_keys /root/.ssh/

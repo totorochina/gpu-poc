@@ -18,6 +18,15 @@ images:
 # Resources for the pods
 resources:
   requests:
-    cpu: 150m
+    cpu: null
   limits:
     nvidia.com/gpu: 8
+
+volumes:
+  persistentVolumeClaims:
+    checkpoint:
+      claimName: null
+    training:
+      claimName: null
+    nfs:
+      claimName: null

@@ -1,12 +1,12 @@
 # Number of NCCL nodes to create
-replicaCount: 2
+replicaCount: 16
 
 # Persistent Volume Claims
 volumes:
   persistentVolumeClaims:
     checkpoint:
-      claimName: checkpoint-gke-a4-poc-c6aa9adf-pvc
+      claimName: checkpoint-gke-a4-poc-f2a05f0f-pvc
     training:
-      claimName: training-gke-a4-poc-50421fa9-pvc
+      claimName: training-gke-a4-poc-f0f0544d-pvc
     nfs:
       claimName: cfs-pvc

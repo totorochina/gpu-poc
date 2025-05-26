@@ -1,0 +1,10 @@
+# Number of NCCL nodes to create
+replicaCount: 2
+
+# Persistent Volume Claims
+volumes:
+  persistentVolumeClaims:
+    checkpoint:
+      claimName: checkpoint-gke-a4-hzchen-poc-130616bf-pvc
+    training:
+      claimName: training-gke-a4-hzchen-poc-b0b94447-pvc
